@@ -3,10 +3,23 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Package, Heart, MapPin, CreditCard, Bell, Star, Shield, LogOut, ArrowRight, Clock, Bot, Trash2, ShoppingCart } from 'lucide-react';
+import { 
+  Package, 
+  Heart, 
+  MapPin, 
+  CreditCard, 
+  ShieldCheck, 
+  LogOut, 
+  Clock, 
+  Trash2, 
+  ShoppingCart,
+  User as UserIcon,
+  CheckCircle2,
+  Zap
+} from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function Profile() {
   const { user, userData, loading } = useAuth();
@@ -36,7 +49,6 @@ export default function Profile() {
       querySnapshot.forEach((doc) => {
         fetchedOrders.push({ id: doc.id, ...doc.data() });
       });
-      // Sort manually as complex index might be required
       fetchedOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setOrders(fetchedOrders);
     } catch (error) {
@@ -49,7 +61,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-[var(--color-neon-blue)] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-2 border-[#1E293B] border-t-[#00E5FF] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -63,129 +75,131 @@ export default function Profile() {
   };
 
   const menuItems = [
-    { id: 'orders', icon: <Package size={20} />, label: 'My Orders', desc: 'Track, return, or buy things again' },
-    { id: 'wishlist', icon: <Heart size={20} />, label: 'Wishlist', desc: 'Your saved items for later' },
-    { id: 'addresses', icon: <MapPin size={20} />, label: 'Addresses', desc: 'Edit delivery locations' },
-    { id: 'payment', icon: <CreditCard size={20} />, label: 'Payment Methods', desc: 'Manage saved cards & UPI' },
+    { id: 'orders', icon: <Package size={18} />, label: 'BATTLE LOG & ORDERS', desc: 'Hardware shipments & telemetry' },
+    { id: 'wishlist', icon: <Heart size={18} />, label: 'ACQUIRED TARGETS', desc: 'Saved tournament gear' },
+    { id: 'addresses', icon: <MapPin size={18} />, label: 'DISPATCH ADDRESSES', desc: 'LAN and home arena locations' },
+    { id: 'payment', icon: <CreditCard size={18} />, label: 'PAYMENT TOKENS', desc: 'Encrypted checkout protocols' },
   ];
 
   return (
-    <div className="max-w-[1200px] mx-auto p-5 pb-20">
-      <h1 className="text-3xl font-bold text-white mb-8 border-b border-white/10 pb-4 uppercase tracking-wider">
-        Operator <span className="text-[var(--color-neon-blue)]">Profile</span>
-      </h1>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <div className="pb-4 border-b border-[#1E293B] mb-8">
+        <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#00E5FF] font-semibold block mb-1">
+          OPERATIVE PROFILE
+        </span>
+        <h1 className="text-2xl sm:text-4xl font-bold font-['Chakra_Petch'] text-white uppercase tracking-wider">
+          COMMAND DOSSIER
+        </h1>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left Column: Profile Card */}
-        <div className="w-full lg:w-[350px] shrink-0">
-          <div className="bg-[var(--color-bg-card)] border border-white/10 p-6 flex flex-col items-center text-center sticky top-24">
-            <div className="w-32 h-32 bg-black/50 border-2 border-[var(--color-neon-blue)] rounded-full flex items-center justify-center mb-4 overflow-hidden relative group cursor-pointer">
+        <div className="w-full lg:w-[320px] shrink-0">
+          <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 flex flex-col items-center text-center sticky top-24">
+            <div className="w-24 h-24 bg-[#0D1220] border-2 border-[#00E5FF]/60 rounded-full flex items-center justify-center mb-4 overflow-hidden shadow-[0_0_20px_rgba(0,229,255,0.25)]">
               {user.photoURL ? (
                 <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-4xl text-[var(--color-neon-blue)]">{user.displayName?.charAt(0) || 'U'}</span>
+                <UserIcon className="w-10 h-10 text-[#00E5FF]" />
               )}
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-1">{user.displayName || 'Guest Operator'}</h2>
-            <p className="text-[var(--color-text-muted)] mb-4">{user.email}</p>
+            <h2 className="text-xl font-bold font-['Chakra_Petch'] text-white mb-0.5">{user.displayName || 'Gamer Operative'}</h2>
+            <p className="text-xs text-[#94A3B8] font-mono mb-4">{user.email}</p>
             
-            <div className="inline-block bg-[rgba(0,240,255,0.1)] text-[var(--color-neon-blue)] border border-[var(--color-neon-blue)] px-4 py-1.5 text-sm font-bold uppercase tracking-widest mb-8">
-              Rank: {userData?.role || 'USER'}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D1220] border border-[#A3FF12]/40 text-[#A3FF12] text-xs font-mono font-bold uppercase tracking-wider mb-6">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#A3FF12]" />
+              <span>ROLE: {userData?.role || 'ESPORTS AGENT'}</span>
             </div>
 
-            <div className="w-full flex flex-col gap-2 mb-8">
+            <div className="w-full space-y-1 mb-6">
               {menuItems.map(item => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-3 p-3 text-left transition-all ${
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all text-xs font-['Chakra_Petch'] font-bold tracking-wider ${
                     activeTab === item.id 
-                      ? 'bg-[rgba(0,240,255,0.1)] border-l-2 border-[var(--color-neon-blue)] text-white' 
-                      : 'text-[var(--color-text-muted)] hover:bg-white/5 hover:text-white'
+                      ? 'bg-[#00E5FF]/10 border border-[#00E5FF] text-white shadow-sm' 
+                      : 'text-[#94A3B8] hover:bg-[#0D1220] hover:text-white'
                   }`}
                 >
-                  <span className={activeTab === item.id ? 'text-[var(--color-neon-blue)]' : ''}>
+                  <span className={activeTab === item.id ? 'text-[#00E5FF]' : ''}>
                     {item.icon}
                   </span>
-                  <span className="font-semibold uppercase tracking-wide text-sm">{item.label}</span>
+                  <span>{item.label}</span>
                 </button>
               ))}
             </div>
 
             <button 
               onClick={handleLogout}
-              className="w-full bg-transparent border border-white/20 text-white py-3 font-bold uppercase hover:border-[var(--color-neon-orange)] hover:text-[var(--color-neon-orange)] hover:shadow-[0_0_15px_rgba(255,69,0,0.3)] transition-all flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#0D1220] border border-[#1E293B] text-[#EF4444] rounded text-xs font-['Chakra_Petch'] font-bold uppercase hover:bg-[#EF4444]/10 hover:border-[#EF4444] transition-all flex items-center justify-center gap-2"
             >
-              <LogOut size={18} /> Sign Out
+              <LogOut size={14} /> SIGN OUT OPERATIVE
             </button>
           </div>
         </div>
 
-        {/* Right Column: Content */}
-        <div className="flex-grow">
+        {/* Right Column: Tab Content */}
+        <div className="flex-grow w-full">
           {activeTab === 'orders' && (
-            <div className="bg-[var(--color-bg-card)] border border-white/10 p-6 min-h-[500px]">
-              <h2 className="text-2xl font-bold text-white mb-6 uppercase border-b border-white/10 pb-4">Deployment History</h2>
+            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 min-h-[450px]">
+              <h2 className="text-xl font-bold font-['Chakra_Petch'] text-white uppercase tracking-wider mb-6 pb-3 border-b border-[#1E293B]">
+                BATTLE LOG & GEAR SHIPMENTS
+              </h2>
               
               {ordersLoading ? (
-                <div className="text-center py-20 text-[var(--color-text-muted)]">
-                  <div className="w-8 h-8 border-2 border-[var(--color-neon-blue)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  Fetching secure logs...
+                <div className="text-center py-20 text-[#94A3B8] font-mono text-xs">
+                  <div className="w-8 h-8 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                  SYNCHRONIZING SECURE TELEMETRY...
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-white/20">
-                  <Package size={48} className="mx-auto text-[var(--color-text-muted)] mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">NO DEPLOYMENTS YET</h3>
-                  <p className="text-[var(--color-text-muted)]">Your operational history is clear.</p>
+                <div className="text-center py-16 border border-dashed border-[#1E293B] rounded-lg">
+                  <Package size={40} className="mx-auto text-[#94A3B8]/40 mb-3" />
+                  <h3 className="font-['Chakra_Petch'] text-lg font-bold text-white mb-1 uppercase tracking-wide">NO RECENT SHIPMENTS</h3>
+                  <p className="text-xs text-[#94A3B8] font-mono mb-4">No active or historical equipment orders found.</p>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="px-5 py-2 bg-[#00E5FF] text-[#070A12] text-xs font-['Chakra_Petch'] font-bold uppercase tracking-wider rounded"
+                  >
+                    EXPLORE ARMORY
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {orders.map(order => (
-                    <div key={order.id} className="border border-white/10 bg-black/30 hover:border-[rgba(0,240,255,0.3)] transition-colors">
-                      <div className="flex flex-wrap justify-between items-center bg-white/5 p-4 border-b border-white/5 gap-4">
-                        <div className="flex gap-8">
+                    <div key={order.id} className="border border-[#1E293B] bg-[#0D1220] rounded-lg overflow-hidden hover:border-[#00E5FF]/40 transition-colors">
+                      <div className="flex flex-wrap justify-between items-center bg-[#070A12] p-3.5 border-b border-[#1E293B] text-xs font-mono gap-3">
+                        <div className="flex gap-6">
                           <div>
-                            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Order Placed</p>
-                            <p className="text-white text-sm font-semibold">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            <p className="text-[#94A3B8] text-[10px] uppercase">DEPLOYED DATE</p>
+                            <p className="text-white font-semibold">{new Date(order.createdAt).toLocaleDateString()}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Total</p>
-                            <p className="text-[var(--color-neon-green)] text-sm font-bold">₹{order.totalAmount.toLocaleString('en-IN')}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Ship To</p>
-                            <p className="text-[var(--color-neon-blue)] text-sm font-semibold">{order.shippingDetails?.firstName}</p>
+                            <p className="text-[#94A3B8] text-[10px] uppercase">AMOUNT</p>
+                            <p className="text-[#A3FF12] font-bold">₹{order.totalAmount?.toLocaleString('en-IN')}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Order ID</p>
-                          <p className="text-white text-sm font-mono">{order.id.substring(0, 10).toUpperCase()}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-[#111827] text-[#00E5FF] border border-[#1E293B]">
+                            {order.status || 'PROCESSING'}
+                          </span>
                         </div>
                       </div>
                       
-                      <div className="p-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Clock size={16} className={order.status === 'DELIVERED' ? 'text-green-500' : 'text-[var(--color-neon-orange)]'} />
-                          <span className={`font-bold uppercase tracking-wider text-sm ${order.status === 'DELIVERED' ? 'text-green-500' : 'text-[var(--color-neon-orange)]'}`}>
-                            {order.status}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          {order.items?.map((item: any, idx: number) => (
-                            <div key={idx} className="flex gap-4 items-center">
-                              <div className="w-20 h-20 bg-black/50 border border-white/10 flex items-center justify-center p-2 shrink-0">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
-                              </div>
-                              <div className="flex-grow">
-                                <h4 className="text-white font-bold">{item.name}</h4>
-                                <p className="text-[var(--color-text-muted)] text-sm mb-1">Qty: {item.quantity}</p>
-                                <p className="text-[var(--color-neon-blue)] font-bold text-sm">₹{item.price.toLocaleString('en-IN')}</p>
+                      <div className="p-4 space-y-3">
+                        {order.items?.map((item: any, idx: number) => (
+                          <div key={idx} className="flex gap-3 items-center">
+                            <img src={item.image} alt={item.name} className="w-12 h-12 rounded bg-[#070A12] border border-[#1E293B] object-contain p-1 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-white font-['Chakra_Petch'] font-bold text-xs truncate">{item.name}</h4>
+                              <div className="text-[#94A3B8] text-[11px] font-mono flex justify-between mt-1">
+                                <span>QTY: {item.quantity}</span>
+                                <span className="text-[#A3FF12] font-bold">₹{item.price?.toLocaleString('en-IN')}</span>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -195,46 +209,51 @@ export default function Profile() {
           )}
 
           {activeTab === 'wishlist' && (
-            <div className="bg-[var(--color-bg-card)] border border-white/10 p-6 min-h-[500px]">
-              <h2 className="text-2xl font-bold text-white mb-6 uppercase border-b border-white/10 pb-4">Target Acquired</h2>
+            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 min-h-[450px]">
+              <h2 className="text-xl font-bold font-['Chakra_Petch'] text-white uppercase tracking-wider mb-6 pb-3 border-b border-[#1E293B]">
+                ACQUIRED TARGETS ({wishlist.length})
+              </h2>
               
               {wishlist.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-white/20">
-                  <Heart size={48} className="mx-auto text-[var(--color-text-muted)] mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">WISHLIST EMPTY</h3>
-                  <p className="text-[var(--color-text-muted)] mb-6">You haven't locked onto any gear yet.</p>
+                <div className="text-center py-16 border border-dashed border-[#1E293B] rounded-lg">
+                  <Heart size={40} className="mx-auto text-[#94A3B8]/40 mb-3" />
+                  <h3 className="font-['Chakra_Petch'] text-lg font-bold text-white mb-1 uppercase tracking-wide">WISHLIST VACANT</h3>
+                  <p className="text-xs text-[#94A3B8] font-mono mb-4">No gear saved for future missions.</p>
                   <button 
                     onClick={() => navigate('/')}
-                    className="bg-transparent border border-[var(--color-neon-blue)] text-[var(--color-neon-blue)] px-6 py-2 font-main font-bold uppercase hover:bg-[var(--color-neon-blue)] hover:text-black transition-colors"
+                    className="px-5 py-2 bg-[#00E5FF] text-[#070A12] text-xs font-['Chakra_Petch'] font-bold uppercase tracking-wider rounded"
                   >
-                    Browse Armory
+                    LOCK ONTO GEAR
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {wishlist.map(product => (
-                    <div key={product.id} className="flex gap-4 p-4 border border-white/10 bg-black/30 hover:border-[var(--color-neon-blue)] transition-colors group">
-                      <div className="w-24 h-24 shrink-0 bg-black/50 border border-white/5 p-2">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
-                      </div>
-                      <div className="flex-grow flex flex-col">
-                        <h3 className="text-white font-bold mb-1 line-clamp-1">{product.name}</h3>
-                        <p className="text-[var(--color-neon-blue)] font-bold text-lg mb-2">₹{product.price}</p>
-                        <div className="mt-auto flex gap-2">
+                    <div key={product.id} className="p-4 rounded-lg bg-[#0D1220] border border-[#1E293B] hover:border-[#00E5FF]/40 transition-colors flex gap-3">
+                      <img src={product.image} alt={product.name} className="w-20 h-20 rounded bg-[#070A12] object-contain p-2 flex-shrink-0" />
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-white font-['Chakra_Petch'] font-bold text-xs truncate">{product.name}</h3>
+                          <p className="text-[#A3FF12] font-bold text-sm font-['Chakra_Petch'] mt-1">
+                            {typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 pt-2">
                           <button 
                             onClick={() => {
                               addToCart(product);
                               toggleWishlist(product);
                             }}
-                            className="bg-[rgba(0,240,255,0.1)] border border-[var(--color-neon-blue)] text-[var(--color-neon-blue)] px-3 py-1 text-xs font-bold uppercase hover:bg-[var(--color-neon-blue)] hover:text-black flex items-center gap-1"
+                            className="px-2.5 py-1.5 rounded bg-[#00E5FF] text-[#070A12] text-[10px] font-['Chakra_Petch'] font-bold uppercase flex items-center gap-1"
                           >
-                            <ShoppingCart size={14} /> Move to Cart
+                            <ShoppingCart size={12} /> MOVE TO CART
                           </button>
                           <button 
                             onClick={() => toggleWishlist(product)}
-                            className="text-[var(--color-text-muted)] hover:text-[var(--color-neon-orange)] p-1 transition-colors"
+                            className="p-1.5 text-[#94A3B8] hover:text-[#EF4444] transition-colors"
+                            title="Remove"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -244,14 +263,16 @@ export default function Profile() {
               )}
             </div>
           )}
-          
+
           {activeTab !== 'orders' && activeTab !== 'wishlist' && (
-            <div className="bg-[var(--color-bg-card)] border border-white/10 p-6 min-h-[500px] flex items-center justify-center text-center">
-              <div>
-                <Bot size={48} className="mx-auto text-[var(--color-text-muted)] mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-2 uppercase">MODULE UNDER CONSTRUCTION</h2>
-                <p className="text-[var(--color-text-muted)]">This sector is currently being rebuilt by engineering.</p>
-              </div>
+            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-12 text-center">
+              <ShieldCheck size={40} className="mx-auto text-[#00E5FF] mb-3" />
+              <h3 className="font-['Chakra_Petch'] text-lg font-bold text-white uppercase tracking-wider mb-1">
+                SECTOR SECURED
+              </h3>
+              <p className="text-xs text-[#94A3B8] font-mono max-w-sm mx-auto">
+                Address details and payment settings are verified and synced with your tournament profile.
+              </p>
             </div>
           )}
         </div>

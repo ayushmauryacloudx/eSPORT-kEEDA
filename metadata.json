@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "eSPORT kEEDA - Ultimate Gaming Gear",
+  "description": "DOMINATE THE LOBBY WITH THE BEST GEAR IN THE GAME.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

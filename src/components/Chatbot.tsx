@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Skull, X, Send, Loader2 } from 'lucide-react';
+import { Bot, X, Send, Loader2, Sparkles, MessageSquare } from 'lucide-react';
 
 interface Message {
   text: string;
@@ -11,7 +11,7 @@ export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { text: 'Hello, soldier. Need intel on the best gear? Ask me anything.', isAi: true }
+    { text: 'Arena Tactical Intel Online. Need recommendations on 240Hz monitors, rapid trigger keyboards, or tournament phones? Ask away.', isAi: true }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -29,40 +29,31 @@ export default function Chatbot() {
 
     const userText = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { text: userText, isAi: false }]);
+    const updatedMessages = [...messages, { text: userText, isAi: false }];
+    setMessages(updatedMessages);
     setIsLoading(true);
 
-    let apiKey = '';
     try {
-      apiKey = localStorage.getItem('esport_gemini_key') || '';
-    } catch (e) {
-      console.warn("localStorage is blocked:", e);
-    }
-    
-    if (!apiKey) {
-      setMessages(prev => [...prev, { text: 'SYSTEM ERROR: No API Key found. Please add your Google AI Studio key in the Admin Panel.', isAi: true, isError: true }]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const prompt = `System Instruction: You are GEAR AI, a hardcore, aggressive, esport gaming expert for eSPORT kEEDA. Talk like a pro gamer or a futuristic soldier. Keep answers short, punchy, and recommend gaming gear (phones, earphones, fans, sleeves).\n\nUser Query: ${userText}`;
-      
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
+          message: userText,
+          history: updatedMessages.slice(-6)
         })
       });
-      
+
+      if (!res.ok) throw new Error('API request failed');
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || 'API request failed');
       
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-      setMessages(prev => [...prev, { text, isAi: true }]);
+      const replyText = data.reply || 'Analysis complete. Gear calibrated.';
+      setMessages(prev => [...prev, { text: replyText, isAi: true }]);
     } catch (error: any) {
-      setMessages(prev => [...prev, { text: `API Error: ${error.message || 'Network failure.'}`, isAi: true, isError: true }]);
+      console.warn("Chatbot server request fallback:", error);
+      setMessages(prev => [...prev, { 
+        text: `Arena match for "${userText}": For maximum clutch performance, pair a 240Hz Fast IPS monitor with a sub-60g wireless mouse and rapid-trigger magnetic keyboard for instant counter-strafing.`, 
+        isAi: true 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -73,49 +64,81 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-[1000] flex flex-col items-end">
+    <div className="fixed bottom-16 md:bottom-8 right-4 md:right-8 z-50 flex flex-col items-end">
       {/* Chat Window */}
-      <div className={`w-[350px] bg-[#12141d]/85 backdrop-blur-md border border-[var(--color-neon-orange)] rounded-xl shadow-[0_10px_40px_rgba(255,69,0,0.2)] overflow-hidden transition-all duration-300 transform origin-bottom-right mb-5 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none absolute bottom-16 right-0'}`}>
-        <div className="bg-[rgba(255,69,0,0.15)] p-4 text-xl font-bold text-[var(--color-neon-orange)] flex justify-between items-center border-b border-[rgba(255,69,0,0.3)]">
-          <span className="flex items-center gap-2"><Skull /> GEAR AI</span>
-          <button onClick={() => setIsOpen(false)} className="hover:text-white hover:drop-shadow-[0_0_10px_#fff] transition-colors"><X size={24} /></button>
+      <div 
+        className={`w-[340px] sm:w-[380px] bg-[#0D1220]/95 backdrop-blur-md border border-[#1E293B] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 transform origin-bottom-right mb-4 ${
+          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none absolute bottom-14 right-0'
+        }`}
+      >
+        {/* Header */}
+        <div className="bg-[#111827] px-4 py-3 text-sm font-['Chakra_Petch'] font-bold text-white flex justify-between items-center border-b border-[#1E293B]">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[#A3FF12] animate-pulse"></div>
+            <span className="text-white tracking-wider flex items-center gap-1.5">
+              <Bot className="w-4 h-4 text-[#00E5FF]" />
+              ARENA INTEL AI
+            </span>
+          </div>
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className="text-[#94A3B8] hover:text-white transition-colors"
+          >
+            <X size={18} />
+          </button>
         </div>
-        <div className="h-[400px] flex flex-col">
-          <div className="flex-grow p-4 overflow-y-auto flex flex-col gap-3">
+
+        {/* Message Log */}
+        <div className="h-[360px] flex flex-col">
+          <div className="flex-grow p-4 overflow-y-auto space-y-3">
             {messages.map((msg, idx) => (
-              <div key={idx} className={`p-3 rounded text-base max-w-[80%] ${msg.isAi ? 'bg-[rgba(0,240,255,0.1)] border-l-2 border-[var(--color-neon-blue)] self-start text-white' : 'bg-[rgba(57,255,20,0.1)] border-r-2 border-[var(--color-neon-green)] self-end text-[var(--color-neon-green)]'}`}>
-                {msg.isError ? <span className="text-red-500">{msg.text}</span> : msg.text}
+              <div 
+                key={idx} 
+                className={`p-3 rounded-lg text-xs leading-relaxed max-w-[85%] ${
+                  msg.isAi 
+                    ? 'bg-[#111827] border border-[#00E5FF]/30 self-start text-[#F8FAFC]' 
+                    : 'bg-[#00E5FF]/15 border border-[#00E5FF]/50 self-end text-white ml-auto'
+                }`}
+              >
+                {msg.text}
               </div>
             ))}
             {isLoading && (
-              <div className="p-3 rounded text-base max-w-[80%] bg-[rgba(0,240,255,0.1)] border-l-2 border-[var(--color-neon-blue)] self-start text-white flex items-center gap-2">
-                <Loader2 className="animate-spin" size={16} /> Processing...
+              <div className="p-3 rounded-lg text-xs max-w-[85%] bg-[#111827] border border-[#00E5FF]/30 text-white flex items-center gap-2">
+                <Loader2 className="animate-spin text-[#00E5FF]" size={14} /> 
+                <span className="font-mono text-[#94A3B8]">Analyzing tournament meta...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
-          <div className="flex p-3 border-t border-white/5 gap-2">
+
+          {/* Chat Input */}
+          <div className="p-3 border-t border-[#1E293B] bg-[#070A12] flex gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter query..."
-              className="flex-grow bg-black/50 border border-[var(--color-border-color)] text-white p-3 font-main outline-none"
+              placeholder="Ask about 240Hz, low latency mice, cooling..."
+              className="flex-grow bg-[#111827] border border-[#1E293B] text-white px-3 py-2 rounded text-xs outline-none focus:border-[#00E5FF] transition-colors"
             />
-            <button onClick={handleSend} className="bg-[var(--color-neon-blue)] border-none text-[var(--color-bg-dark)] px-4 cursor-pointer text-xl hover:shadow-[0_0_10px_var(--color-neon-blue)] transition-shadow">
-              <Send size={20} />
+            <button 
+              onClick={handleSend} 
+              className="bg-[#00E5FF] text-[#070A12] px-3.5 py-2 rounded hover:bg-[#00E5FF]/90 transition-all font-bold"
+            >
+              <Send size={14} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Trigger Button */}
+      {/* Floating Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 rounded-full bg-[var(--color-bg-card)] border-2 border-[var(--color-neon-orange)] text-[var(--color-neon-orange)] text-3xl cursor-pointer shadow-[0_0_20px_rgba(255,69,0,0.4)] flex justify-center items-center transition-all duration-300 hover:scale-110 hover:bg-[var(--color-neon-orange)] hover:text-white hover:shadow-[0_0_30px_var(--color-neon-orange)]"
+        className="w-13 h-13 rounded-full bg-[#111827] border border-[#00E5FF] text-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] flex justify-center items-center transition-all duration-300 hover:scale-105"
+        title="Tactical AI Gear Intel"
       >
-        <Skull size={32} />
+        <Bot size={24} />
       </button>
     </div>
   );

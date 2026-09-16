@@ -23,11 +23,12 @@ export default function AuthModal({ isOpen, onClose }: { isOpen: boolean, onClos
       const userDocSnap = await getDoc(userDocRef);
       
       if (!userDocSnap.exists()) {
+        const isAdmin = user.email === 'shalumaurya7814@gmail.com';
         await setDoc(userDocRef, {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName,
-          role: 'USER', // Default role
+          role: isAdmin ? 'ADMIN' : 'USER',
           createdAt: new Date().toISOString()
         });
       }

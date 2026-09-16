@@ -1,59 +1,91 @@
 {
-  "collections": [
-    {
-      "name": "users",
-      "description": "User profiles including role-based access.",
-      "fields": {
-        "uid": "string - Firebase Auth UID",
-        "email": "string",
-        "displayName": "string",
-        "role": "string - 'USER', 'SELLER', or 'ADMIN'",
-        "createdAt": "timestamp"
-      }
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "role": { "type": "string", "enum": ["USER", "SELLER", "ADMIN"], "description": "User clearance role" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" }
+      },
+      "required": ["uid", "email", "role"]
     },
-    {
-      "name": "products",
-      "description": "Product catalog.",
-      "fields": {
-        "name": "string",
-        "description": "string",
-        "price": "number",
-        "originalPrice": "number",
-        "category": "string",
-        "image": "string",
-        "sellerId": "string - Reference to users collection",
-        "stock": "number",
-        "createdAt": "timestamp",
-        "updatedAt": "timestamp"
-      }
+    "Product": {
+      "title": "Product",
+      "description": "Gaming equipment and accessories in catalog",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product title" },
+        "category": { "type": "string", "description": "Gear category" },
+        "image": { "type": "string", "description": "Image URL" },
+        "originalPrice": { "type": "number", "description": "MSRP before discount" },
+        "price": { "type": "number", "description": "Selling price" },
+        "link": { "type": "string", "description": "Affiliate or product link" },
+        "stock": { "type": "number", "description": "Units available in stock" },
+        "sellerId": { "type": "string", "description": "ID of selling account" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["name", "category", "price"]
     },
-    {
-      "name": "orders",
-      "description": "User orders tracking.",
-      "fields": {
-        "userId": "string - Reference to users collection",
-        "items": "array of objects",
-        "totalAmount": "number",
-        "status": "string - e.g., 'PLACED', 'SHIPPED', 'DELIVERED'",
-        "shippingAddress": "map",
-        "createdAt": "timestamp"
-      }
+    "Order": {
+      "title": "Order",
+      "description": "Customer order records",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Purchaser UID" },
+        "items": { "type": "array", "description": "Ordered line items" },
+        "totalAmount": { "type": "number", "description": "Final paid amount" },
+        "status": { "type": "string", "description": "Fulfillment status" },
+        "shippingAddress": { "type": "object", "description": "Delivery address" },
+        "createdAt": { "type": "string", "description": "Order placement timestamp" }
+      },
+      "required": ["userId", "items", "totalAmount"]
     },
-    {
-      "name": "carts",
-      "description": "User shopping carts.",
-      "fields": {
-        "userId": "string - Collection document ID should match userId",
-        "items": "array of objects (productId, quantity)"
-      }
+    "Cart": {
+      "title": "Cart",
+      "description": "User shopping cart containing items",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "items": { "type": "array", "description": "Array of cart items" }
+      },
+      "required": ["userId"]
     },
-    {
-      "name": "wishlists",
-      "description": "User wishlists.",
-      "fields": {
-        "userId": "string - Collection document ID should match userId",
-        "productIds": "array of strings"
-      }
+    "Wishlist": {
+      "title": "Wishlist",
+      "description": "User saved favorite products",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "items": { "type": "array", "description": "Array of saved products" }
+      },
+      "required": ["userId"]
     }
-  ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "entities.User" },
+      "description": "User profiles indexed by UID"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "entities.Product" },
+      "description": "Public gaming products armory catalog"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "entities.Order" },
+      "description": "User orders and checkout records"
+    },
+    "/carts/{userId}": {
+      "schema": { "$ref": "entities.Cart" },
+      "description": "Active shopping cart indexed by user ID"
+    },
+    "/wishlists/{userId}": {
+      "schema": { "$ref": "entities.Wishlist" },
+      "description": "Saved gear wishlist indexed by user ID"
+    }
+  }
 }

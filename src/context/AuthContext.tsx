@@ -30,14 +30,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists()) {
-            setUserData(userDoc.data() as UserData);
+            const data = userDoc.data() as UserData;
+            if (currentUser.email === 'shalumaurya7814@gmail.com') {
+              data.role = 'ADMIN';
+            }
+            setUserData(data);
           } else {
             // Default data for new users before doc is created
+            const isAdminEmail = currentUser.email === 'shalumaurya7814@gmail.com';
             setUserData({
               uid: currentUser.uid,
               email: currentUser.email,
               displayName: currentUser.displayName,
-              role: 'USER'
+              role: isAdminEmail ? 'ADMIN' : 'USER'
             });
           }
         } catch (error) {
