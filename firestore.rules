@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is the owner of the document (UID matches)
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Retrieve user's role from the users collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'ADMIN';
+    }
+    
+    function isSeller() {
+      return isAuthenticated() && getUserRole() == 'SELLER';
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      // Anyone can create their own profile during signup
+      allow create: if isOwner(userId);
+      // Users can read and update their own profile; Admins can do everything
+      allow read, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Products Collection
+    match /products/{productId} {
+      // Anyone can read products
+      allow read: if true;
+      // Sellers can create products, must set themselves as sellerId
+      allow create: if isSeller() && request.resource.data.sellerId == request.auth.uid;
+      // Sellers can update/delete their own products; Admins can do everything
+      allow update, delete: if (isSeller() && resource.data.sellerId == request.auth.uid) || isAdmin();
+    }
+    
+    // Orders Collection
+    match /orders/{orderId} {
+      // Users can read and create their own orders
+      allow create: if isOwner(request.resource.data.userId);
+      allow read: if isOwner(resource.data.userId) || isAdmin() || isSeller(); // Note: Sellers should optimally only see their items, but for now they can see orders
+      allow update, delete: if isAdmin();
+    }
+    
+    // Carts Collection (Document ID = userId)
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+    
+    // Wishlists Collection (Document ID = userId)
+    match /wishlists/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+  }
+}

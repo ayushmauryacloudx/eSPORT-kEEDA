@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --font-main: "Rajdhani", sans-serif;
+  --color-bg-dark: #090a0f;
+  --color-bg-card: #12141d;
+  --color-bg-card-hover: #1a1c29;
+  --color-neon-blue: #00f0ff;
+  --color-neon-green: #39ff14;
+  --color-neon-orange: #ff4500;
+  --color-text-main: #ffffff;
+  --color-text-muted: #8892b0;
+  --color-border-color: rgba(0, 240, 255, 0.2);
+}
+
+@layer base {
+  body {
+    @apply bg-transparent text-text-main font-main overflow-x-hidden relative min-h-screen;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110vw;
+    height: 110vh;
+    background-image: url('/squad_bg.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.5) contrast(1.1);
+    z-index: -1;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-dark);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-neon-blue);
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .clip-path-btn {
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+  }
+  .clip-path-view-all {
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+  }
+  .clip-path-card {
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
+  }
+  .clip-path-social {
+    clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+  }
+}

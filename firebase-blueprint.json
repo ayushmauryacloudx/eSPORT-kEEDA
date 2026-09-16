@@ -1,0 +1,59 @@
+{
+  "collections": [
+    {
+      "name": "users",
+      "description": "User profiles including role-based access.",
+      "fields": {
+        "uid": "string - Firebase Auth UID",
+        "email": "string",
+        "displayName": "string",
+        "role": "string - 'USER', 'SELLER', or 'ADMIN'",
+        "createdAt": "timestamp"
+      }
+    },
+    {
+      "name": "products",
+      "description": "Product catalog.",
+      "fields": {
+        "name": "string",
+        "description": "string",
+        "price": "number",
+        "originalPrice": "number",
+        "category": "string",
+        "image": "string",
+        "sellerId": "string - Reference to users collection",
+        "stock": "number",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      }
+    },
+    {
+      "name": "orders",
+      "description": "User orders tracking.",
+      "fields": {
+        "userId": "string - Reference to users collection",
+        "items": "array of objects",
+        "totalAmount": "number",
+        "status": "string - e.g., 'PLACED', 'SHIPPED', 'DELIVERED'",
+        "shippingAddress": "map",
+        "createdAt": "timestamp"
+      }
+    },
+    {
+      "name": "carts",
+      "description": "User shopping carts.",
+      "fields": {
+        "userId": "string - Collection document ID should match userId",
+        "items": "array of objects (productId, quantity)"
+      }
+    },
+    {
+      "name": "wishlists",
+      "description": "User wishlists.",
+      "fields": {
+        "userId": "string - Collection document ID should match userId",
+        "productIds": "array of strings"
+      }
+    }
+  ]
+}
